@@ -12,6 +12,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+/**
+ * 
+ * @author NetzkroneHD
+ * @version 1.0
+ *
+ */
 public class GeolocationAPI {
 
 	public static final HashMap<String, GeolocationInfo> CACHE = new HashMap<String, GeolocationInfo>(); 
