@@ -1,5 +1,4 @@
 package de.netzkronehd.geolocationapi;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,13 +14,11 @@ import com.google.gson.JsonParser;
 /**
  * 
  * @author NetzkroneHD
- * @version 1.0
  *
  */
 public class GeolocationAPI {
-
-	public static final HashMap<String, GeolocationInfo> CACHE = new HashMap<String, GeolocationInfo>(); 
-	public static final HashMap<String, GeolocationInfo> LANGUAGE_CACHE = new HashMap<String, GeolocationInfo>(); 
+	
+	private static final HashMap<String, GeolocationInfo> CACHE = new HashMap<String, GeolocationInfo>(); 
 	
 	
 	/**
@@ -30,7 +27,7 @@ public class GeolocationAPI {
 	 * 
 	 */
 	
-	public static GeolocationInfo getGeolocation(InetSocketAddress adress) throws MalformedURLException, IOException {
+	public GeolocationInfo getGeolocation(InetSocketAddress adress) throws MalformedURLException, IOException {
 		return getGeolocation(adress.getHostName());
 	}
 	
@@ -45,33 +42,8 @@ public class GeolocationAPI {
 	 */
     
 	
-	
-	@SuppressWarnings("deprecation")
-	public static GeolocationInfo getGeolocation(String ip) throws MalformedURLException, IOException {
-		if(CACHE.containsKey(ip)) {
-			return CACHE.get(ip);
-		}
-		final URL url = new URL("http://ip-api.com/json/"+ip+"?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,proxy,query");
-		final BufferedReader stream = new BufferedReader(new InputStreamReader(url.openStream()));
-		final StringBuilder entirePage = new StringBuilder();
-		String inputLine;
-		while ((inputLine = stream.readLine()) != null)
-			entirePage.append(inputLine);
-		stream.close();
-		
-		final String entire = entirePage.toString();
-		final JsonParser jp = new JsonParser();
-		final JsonElement je = jp.parse(entire);
-		if(je.isJsonObject()) {
-			final JsonObject jo = je.getAsJsonObject();
-			
-			final GeolocationInfo info = new GeolocationInfo("en", jo.get("country").getAsString(), jo.get("city").getAsString(), jo.get("countryCode").getAsString(), jo.get("isp").getAsString(), jo.get("regionName").getAsString(), jo.get("proxy").getAsBoolean());
-			CACHE.put(ip, info);
-			return info;
-			
-		}
-		
-		return null;
+	public GeolocationInfo getGeolocation(String ip) throws MalformedURLException, IOException {
+		return getGeolocation(ip, "en");
 	}
 	
 	/**
@@ -79,7 +51,7 @@ public class GeolocationAPI {
 	 * @see #getGeolocation(String, String)
 	 */
     
-	public static GeolocationInfo getGeolocation(InetSocketAddress adress, String languageCode) throws MalformedURLException, IOException {
+	public GeolocationInfo getGeolocation(InetSocketAddress adress, String languageCode) throws MalformedURLException, IOException {
 		return getGeolocation(adress.getHostName(), languageCode);
 	}
 	
@@ -104,9 +76,9 @@ public class GeolocationAPI {
     
 	
 	@SuppressWarnings("deprecation")
-	public static GeolocationInfo getGeolocation(String ip, String languageCode) throws MalformedURLException, IOException {
-		if(LANGUAGE_CACHE.containsKey(ip)) {
-			return LANGUAGE_CACHE.get(ip);
+	public GeolocationInfo getGeolocation(String ip, String languageCode) throws MalformedURLException, IOException {
+		if(CACHE.containsKey(ip)) {
+			return CACHE.get(ip);
 		}
 		final URL url = new URL("http://ip-api.com/json/"+ip+"?lang="+languageCode+"&fields=180767");
 		final BufferedReader stream = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -121,14 +93,64 @@ public class GeolocationAPI {
 		final JsonElement je = jp.parse(entire);
 		if(je.isJsonObject()) {
 			final JsonObject jo = je.getAsJsonObject();
-			
 			final GeolocationInfo info = new GeolocationInfo(languageCode, jo.get("country").getAsString(), jo.get("city").getAsString(), jo.get("countryCode").getAsString(), jo.get("isp").getAsString(), jo.get("regionName").getAsString(), jo.get("proxy").getAsBoolean());
-			LANGUAGE_CACHE.put(ip, info);
+			
+			CACHE.put(ip, info);
 			return info;
 			
 		}
 		
 		return null;
+	}
+	
+	public class GeolocationInfo {
+		private String language, country, city, countryCode, provider, region;
+		private boolean vpn;
+		
+		public GeolocationInfo(String language, String country, String city, String countryCode, String provider, String region, boolean vpn) {
+			this.language = language;
+			this.country = country;
+			this.city = city;
+			this.countryCode = countryCode;
+			this.provider = provider;
+			this.region = region;
+			this.vpn = vpn;
+		}
+
+		
+		public String getLanguage() {
+			return language;
+		}
+		
+		public String getCountry() {
+			return country;
+		}
+
+		public String getCity() {
+			return city;
+		}
+
+		public String getCountryCode() {
+			return countryCode;
+		}
+
+		public String getProvider() {
+			return provider;
+		}
+
+		public String getRegion() {
+			return region;
+		}
+
+		public boolean isVpn() {
+			return vpn;
+		}
+
+		@Override
+		public String toString() {
+			return "GeolocationInfo [country=" + country + ", city=" + city + ", countryCode=" + countryCode + ", provider="
+					+ provider + ", region=" + region + ", vpn=" + vpn + "]";
+		}
 	}
 	
 }
